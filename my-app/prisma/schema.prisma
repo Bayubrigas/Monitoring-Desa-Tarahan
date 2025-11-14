@@ -10,26 +10,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Master data vitamin
-model Vitamin {
-  id        String @id @default(cuid())
-  nama      String @unique
-  keterangan String?
-  pemberian PemberianVitamin[]
-}
-
-// Riwayat pemberian vitamin dalam pemeriksaan
-model PemberianVitamin {
-  id             String @id @default(cuid())
-  pemeriksaanId  String
-  vitaminId      String
-
-  pemeriksaan Pemeriksaan @relation(fields: [pemeriksaanId], references: [id])
-  vitamin     Vitamin     @relation(fields: [vitaminId], references: [id])
-
-  createdAt DateTime @default(now())
-  @@unique([pemeriksaanId, vitaminId])
-}
+// ----------------------------------------------------
+// ENUM
+// ----------------------------------------------------
 
 enum MetodePengukuran {
   Ditimbang
@@ -37,34 +20,77 @@ enum MetodePengukuran {
   TidakDiukur
 }
 
-model Anak {
-  id            String         @id @default(cuid())
-  nama          String
-  tanggalLahir  DateTime
-  jenisKelamin  String
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  pemeriksaan   Pemeriksaan[]
+enum JenisKelamin {
+  L
+  P
 }
 
-model Pemeriksaan {
-  id                String               @id @default(cuid())
-  anakId            String
-  beratBadan        Float?
-  tinggiBadan       Float?
-  lingkarKepala     Float?
-  usiaBulan         Int
-  tanggal           DateTime             @default(now())
+// ----------------------------------------------------
+// MASTER VITAMIN
+// ----------------------------------------------------
 
-  metodeBerat       MetodePengukuran?    @default(Ditimbang)
-  metodeTinggi      MetodePengukuran?    @default(Ditimbang)
+model Vitamin {
+  id         String              @id @default(cuid())
+  nama       String              @unique
+  keterangan String?
+  pemberian  PemberianVitamin[]
+}
+
+// Pivot untuk vitamin yang diberikan dalam pemeriksaan
+model PemberianVitamin {
+  id            String        @id @default(cuid())
+  pemeriksaanId String
+  vitaminId     String
+
+  pemeriksaan   Pemeriksaan   @relation(fields: [pemeriksaanId], references: [id])
+  vitamin       Vitamin        @relation(fields: [vitaminId], references: [id])
+
+  createdAt     DateTime      @default(now())
+
+  @@unique([pemeriksaanId, vitaminId])
+}
+
+// ----------------------------------------------------
+// DATA ANAK
+// ----------------------------------------------------
+
+model Anak {
+  id           String         @id @default(cuid())
+  nama         String
+  tanggalLahir DateTime
+  jenisKelamin JenisKelamin
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  pemeriksaan  Pemeriksaan[]
+
+  // Index untuk performa pencarian
+  @@index([nama])
+  @@index([tanggalLahir])
+}
+
+// ----------------------------------------------------
+// PEMERIKSAAN POSYANDU
+// ----------------------------------------------------
+
+model Pemeriksaan {
+  id                 String             @id @default(cuid())
+  anakId             String
+  beratBadan         Float?
+  tinggiBadan        Float?
+  lingkarKepala      Float?
+  usiaBulan          Int
+  tanggal            DateTime           @default(now())
+
+  metodeBerat        MetodePengukuran?  @default(Ditimbang)
+  metodeTinggi       MetodePengukuran?  @default(Ditimbang)
   metodeLingkarKepala MetodePengukuran? @default(Ditimbang)
 
-  keterangan        String?
+  keterangan         String?
 
-  anak              Anak                 @relation(fields: [anakId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  pemberianVitamin  PemberianVitamin[]
+  anak               Anak               @relation(fields: [anakId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  pemberianVitamin   PemberianVitamin[]
 
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 }
