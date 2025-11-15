@@ -18,6 +18,8 @@ enum MetodePengukuran {
   Ditimbang
   PerkiraanOrtu
   TidakDiukur
+  DiukurPanjangBadan      // ← tambahkan
+  DiukurLingkarKepala     // ← tambahkan
 }
 
 enum JenisKelamin {
