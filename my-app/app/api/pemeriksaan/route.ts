@@ -2,19 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyToken } from "@/lib/auth";
 
-// Validasi metode pengukuran sesuai enum di Prisma
-function isValidMetode(value: unknown): value is "Ditimbang" | "Diukur" | "DiukurPanjangBadan" | "DiukurLingkarKepala" {
+function isValidMetode(value: unknown): value is "Ditimbang" | "PerkiraanOrtu" | "TidakDiukur" {
   return (
     value === "Ditimbang" ||
-    value === "Diukur" ||
-    value === "DiukurPanjangBadan" ||
-    value === "DiukurLingkarKepala"
+    value === "PerkiraanOrtu" ||
+    value === "TidakDiukur"
   );
 }
 
 export async function POST(req: NextRequest) {
   try {
-    // === Hanya admin yang boleh input pemeriksaan ===
+    // === Otentikasi: hanya admin ===
     const authHeader = req.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -81,10 +79,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Anak tidak ditemukan" }, { status: 404 });
     }
 
+    // === Ambil adminId dari token ===
+    const adminId = payload.id;
+
     // === Buat pemeriksaan baru ===
     const pemeriksaanBaru = await prisma.pemeriksaan.create({
-      data: {
+      data: { // ✅ ini yang diperbaiki: tambahkan 'data:'
         anakId,
+        adminId,
         usiaBulan,
         tanggal: tanggal ? new Date(tanggal) : undefined,
         beratBadan: beratBadan || null,

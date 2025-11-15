@@ -18,8 +18,8 @@ enum MetodePengukuran {
   Ditimbang
   PerkiraanOrtu
   TidakDiukur
-  DiukurPanjangBadan      // ← tambahkan
-  DiukurLingkarKepala     // ← tambahkan
+  DiukurPanjangBadan
+  DiukurLingkarKepala
 }
 
 enum JenisKelamin {
@@ -78,6 +78,7 @@ model Anak {
 model Pemeriksaan {
   id                 String             @id @default(cuid())
   anakId             String
+  adminId            String
   beratBadan         Float?
   tinggiBadan        Float?
   lingkarKepala      Float?
