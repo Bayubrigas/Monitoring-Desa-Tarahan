@@ -26,9 +26,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate JWT token
+    // Generate JWT token — Tambahkan role!
     const token = jwt.sign(
-      { id: admin.id, email: admin.email },
+      { 
+        id: admin.id, 
+        email: admin.email,
+        role: "admin" // ✅ ini kuncinya
+      },
       process.env.JWT_SECRET as string,
       { expiresIn: "7d" }
     );
